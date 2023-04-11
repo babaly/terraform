@@ -1,0 +1,90 @@
+- name: Install Datadog Agent on servers in AWS
+  hosts: all
+  become: yes
+  user: ${datadog_user}  # Use the default login for the AWS image. Here we are using a Amazon linux 2 image.
+  roles:
+    - { role: Datadog.datadog, become: yes }
+  vars:
+    datadog_api_key: ${DATADOG_API_KEY}
+    datadog_config:
+      tags:
+        - env:dev
+      logs_enabled: true
+      process_config:
+        enabled: "true"
+
+  tasks:
+
+  - name: Setting up variables
+    set_fact:
+      php_modules: [  'php-fpm','php-mysqlnd', 'php-curl', 'php-gd', 'php-mbstring', 'php-xml', 'php-xmlrpc', 'php-soap', 'php-intl', 'php-zip' ]
+
+  - name: Yum update
+    yum:
+      name: '*'
+      state: latest
+
+  - name: install Apache server
+    yum: name={{ item }} state=present
+    loop: [ 'httpd','mysql']    
+      
+ #installing php using linux-extra
+  
+  - name: Installing PHP
+    shell: amazon-linux-extras enable php8.1
+
+  - name: Clean metadata
+    shell: yum clean metadata
+
+  # install php extension
+  - name: install php extensions
+    yum: name={{ item }} state=present
+    loop: "{{ php_modules }}"
+
+
+  - name: Set permissions for directories
+    shell: "/usr/bin/find /var/www/html/ -type d -exec chmod 2775 {} \\;"
+
+  - name: Set permissions for datadog
+    shell: "chmod 655 -R /var/log/apache2/ \\;"
+    
+  - name: Set permissions for files
+    shell: "/usr/bin/find /var/www/html/ -type f -exec chmod 0664 {} \\;"    
+            
+  # website-demo download and install
+  - name: website-demo download and unpacking
+    unarchive:
+      src: https://github.com/babaly/datadog-website/archive/refs/heads/main.zip
+      dest: "/var/www"
+      remote_src: yes
+  
+  - name: Copy website-demo files to /html folder
+    shell: cp /var/www/main/. /var/www/html -r
+
+  - name: Delete old website-demo files
+    shell: rm /var/www/main -r 
+ 
+    
+  - name: Set up datadog.yaml
+    template:
+      src: "files/datadog.yaml"
+      dest: "/etc/datadog-agent/datadog.yaml"
+  
+  - name: Set up apache log config
+    template:
+      src: "files/conf.yaml"
+      dest: "/etc/datadog-agent/conf.d/apache.d/conf.yaml"
+        
+  - name: set permissions (changing ownership)
+    shell: chown -R ec2-user:apache /var/www/html
+
+  - name: set permission (chmod 774)  
+    shell: chown -R ec2-user:apache /var/www/html
+
+   # apache  server, datadog-agent started
+  - name: services started   
+    service: name={{ item }} state=restarted enabled=True
+    loop: [ 'httpd', 'datadog-agent']
+     
+
+
