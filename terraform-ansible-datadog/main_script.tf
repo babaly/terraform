@@ -104,7 +104,8 @@ data "template_file" "playbook" {
   template = file("${path.module}/datadog-playbook.yml")
   vars = {
     datadog_user      = "${var.datadog_user}"
-    datadog_password = "${var.datadog_password}"
+    datadog_password  = "${var.datadog_password}"
+    datadog_api_key   = "${var.DATADOG_API_KEY}"
   }
 }
 
