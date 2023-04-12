@@ -103,14 +103,14 @@ resource "aws_security_group" "datadog-ec2_allow_rule" {
 data "template_file" "playbook" {
   template = file("${path.module}/datadog-playbook.yml")
   vars = {
-    datadog_user      = "${var.database_user}"
-    datadog_password = "${var.database_password}"
+    datadog_user      = "${var.datadog_user}"
+    datadog_password = "${var.datadog_password}"
   }
 }
 
 
 # Création de EC2
-resource "aws_instance" "wordpressec2" {
+resource "aws_instance" "datadog-agent" {
   ami             = var.ami
   instance_type   = var.instance_type
   subnet_id       = aws_subnet.datadog-subnet-public-ec2.id
@@ -131,7 +131,7 @@ resource "aws_key_pair" "mykey-pair" {
 
 # création d'Elastic IP pour fixer l'adresse IP de l'EC2
 resource "aws_eip" "eip" {
-  instance = aws_instance.wordpressec2.id
+  instance = aws_instance.datadog-agent.id
 
 }
 
@@ -154,8 +154,7 @@ resource "local_file" "playbook-rendered-file" {
 resource "null_resource" "datadog_agent_Installation_Waiting" {
 
   triggers={
-    ec2_id=aws_instance.wordpressec2.id,
-    rds_endpoint=aws_db_instance.wordpressdb.endpoint
+    ec2_id=aws_instance.datadog-agent.id
   }
 
   connection {
