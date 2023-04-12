@@ -1,2 +1,9 @@
 /terraform-ansible-kubctl
 /terraform-grafana-prometheus
+mykey-pair
+mykey-pair.pub
+.terraform
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+user_data_exec.tpl
