@@ -49,7 +49,7 @@ resource "aws_route_table" "datadog-public-route-table" {
 # Associer la table de routage au sous-réseau public
 resource "aws_route_table_association" "datadog-rta-public-subnet-1" {
   // rta = route table association
-  subnet_id      = aws_subnet.datadog-subnet-public-1.id
+  subnet_id      = aws_subnet.datadog-subnet-public-ec2.id
   route_table_id = aws_route_table.datadog-public-route-table.id
 }
 
@@ -103,10 +103,8 @@ resource "aws_security_group" "datadog-ec2_allow_rule" {
 data "template_file" "playbook" {
   template = file("${path.module}/datadog-playbook.yml")
   vars = {
-    db_username      = "${var.database_user}"
-    db_user_password = "${var.database_password}"
-    db_name          = "${var.database_name}"
-    db_RDS           = "${aws_db_instance.wordpressdb.endpoint}"
+    datadog_user      = "${var.database_user}"
+    datadog_password = "${var.database_password}"
   }
 }
 
@@ -115,7 +113,7 @@ data "template_file" "playbook" {
 resource "aws_instance" "wordpressec2" {
   ami             = var.ami
   instance_type   = var.instance_type
-  subnet_id       = aws_subnet.datadog-subnet-public-1.id
+  subnet_id       = aws_subnet.datadog-subnet-public-ec2.id
   vpc_security_group_ids = ["${aws_security_group.datadog-ec2_allow_rule.id}"]
   
   key_name = aws_key_pair.mykey-pair.id

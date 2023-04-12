@@ -1,6 +1,6 @@
 shared_credentials_file = "~/.aws/credentials" //Access key and Secret key file location
 region                  = "us-east-1"        //virginie nord region
-ami                     = "ami-094527b74b81d8a88" // linux 2 ami
+ami                     = "ami-06e46074ae430fba6" // linux 2 ami
 AZ1                     = "us-east-1a"       // avaibility zone
 AZ2                     = "us-east-1b"
 AZ3                     = "us-east-1c"
