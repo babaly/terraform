@@ -177,7 +177,6 @@ resource "null_resource" "datadog_agent_Installation_Waiting" {
 # Executer le playbook ansible 
   provisioner "local-exec" {
      command = <<EOT
-     ansible-galaxy install datadog.datadog;
      export ANSIBLE_HOST_KEY_CHECKING=False; 
      ansible-playbook -u ec2-user -i '${aws_eip.eip.public_ip},' --private-key ${var.PRIV_KEY_PATH}  playbook-rendered.yml
      

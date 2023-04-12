@@ -3,7 +3,7 @@
   become: yes
   user: ${datadog_user}  # Use the default login for the AWS image. Here we are using a Amazon linux 2 image.
   roles:
-    - { role: Datadog.datadog, become: yes }
+    - { role: datadog.datadog, become: yes}
   vars:
     datadog_api_key: ${datadog_api_key}
     datadog_config:
