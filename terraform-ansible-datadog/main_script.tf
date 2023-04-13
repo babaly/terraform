@@ -170,7 +170,7 @@ resource "null_resource" "datadog_agent_Installation_Waiting" {
  # Exécuter le script pour mettre à jour le client distant
   provisioner "remote-exec" {
      
-     inline = ["sudo yum update -y", "echo Done!"]
+     inline = ["sudo yum update -y","sudo yum install python3 -y", "echo Done!"]
    
   }
 
