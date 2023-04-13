@@ -3,9 +3,17 @@
   become: yes
   user: ${datadog_user}  # Use the default login for the AWS image. Here we are using a Amazon linux 2 image.
 
+  roles:
+    - { role: datadog.datadog, become: yes }
+  vars:
+    datadog_api_key: ${datadog_api_key}
+    datadog_config:
+      tags:
+        - env:dev
+      logs_enabled: true
+      process_config:
+        enabled: "true"
   tasks:
-  - name: Installing datadog...
-    shell: DD_API_KEY=${datadog_api_key} DD_SITE="datadoghq.com" bash -c "$(curl -L https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
 
   - name: Setting up variables
     set_fact:
