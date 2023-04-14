@@ -3,17 +3,33 @@
   become: yes
   user: ${datadog_user}  # Use the default login for the AWS image. Here we are using a Amazon linux 2 image.
 
-  roles:
-    - { role: datadog.datadog, become: yes }
-  vars:
-    datadog_api_key: ${datadog_api_key}
-    datadog_config:
-      tags:
-        - env:dev
-      logs_enabled: true
-      process_config:
-        enabled: "true"
   tasks:
+
+  - script: ddagent-install.sh
+  - name: Copy file with owner and permissions
+    copy:
+      src: datadog.yaml
+      dest: /etc/datadog-agent/datadog.yaml
+      owner: dd-agent
+      group: dd-agent
+      mode: '0644'
+  - name: Install HTTPD server
+    command: yum install httpd -y
+  - name: Copy httpd.conf file in All Machine
+    copy:
+      src: httpd.conf
+      dest: /etc/httpd/conf/httpd.conf
+  - name: Restart DD agent
+    command: systemctl restart httpd
+  - name: Copy file with owner and permissions
+    copy:
+      src: apache-conf.yaml
+      dest: /etc/datadog-agent/conf.d/apache.d/conf.yaml
+      owner: dd-agent
+      group: dd-agent
+      mode: '0644'
+  - name: Restart DD agent
+    command: systemctl restart datadog-agent
 
   - name: Setting up variables
     set_fact:
@@ -23,10 +39,6 @@
     yum:
       name: '*'
       state: latest
-
-  - name: install Apache server
-    yum: name={{ item }} state=present
-    loop: [ 'httpd','mysql']    
       
  #installing php using linux-extra
   
